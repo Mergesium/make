@@ -58,6 +58,9 @@ if ($^O eq 'VMS')
   *CORE::GLOBAL::rmdir = \&vms_rmdir;
 }
 
+use FindBin;
+use lib "$FindBin::Bin";
+
 require "test_driver.pl";
 require "config-flags.pm";
 

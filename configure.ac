@@ -18,7 +18,7 @@
 
 AC_INIT([GNU make],[4.1],[bug-make@gnu.org])
 
-AC_PREREQ([2.62])
+AC_PREREQ([2.71])
 
 # Autoconf setup
 AC_CONFIG_AUX_DIR([config])
@@ -46,9 +46,9 @@ AM_PROG_AR
 
 # Specialized system macros
 AC_CANONICAL_HOST
-AC_AIX
-AC_ISC_POSIX
-AC_MINIX
+AC_USE_SYSTEM_EXTENSIONS
+AC_SEARCH_LIBS([strerror],[cposix])
+AC_USE_SYSTEM_EXTENSIONS
 
 # Enable gettext, in "external" mode.
 AM_GNU_GETTEXT_VERSION([0.18.1])
@@ -63,17 +63,50 @@ AC_SYS_LARGEFILE
 AC_SEARCH_LIBS([getpwnam], [sun])
 
 # Checks for header files.
-AC_HEADER_STDC
+m4_warn([obsolete],
+[The preprocessor macro `STDC_HEADERS' is obsolete.
+  Except in unusual embedded environments, you can safely include all
+  ISO C90 headers unconditionally.])dnl
+# Autoupdate added the next two lines to ensure that your configure
+# script's behavior did not change.  They are probably safe to remove.
+AC_CHECK_INCLUDES_DEFAULT
+AC_PROG_EGREP
+
 AC_HEADER_DIRENT
 AC_HEADER_STAT
-AC_HEADER_TIME
+m4_warn([obsolete],
+[Update your code to rely only on HAVE_SYS_TIME_H,
+then remove this warning and the obsolete code below it.
+All current systems provide time.h; it need not be checked for.
+Not all systems provide sys/time.h, but those that do, all allow
+you to include it and time.h simultaneously.])dnl
+AC_CHECK_HEADERS_ONCE([sys/time.h])
+# Obsolete code to be removed.
+if test $ac_cv_header_sys_time_h = yes; then
+  AC_DEFINE([TIME_WITH_SYS_TIME],[1],[Define to 1 if you can safely include both <sys/time.h>
+	     and <time.h>.  This macro is obsolete.])
+fi
+# End of obsolete code.
+
 AC_CHECK_HEADERS([stdlib.h locale.h unistd.h limits.h fcntl.h string.h \
                   memory.h sys/param.h sys/resource.h sys/time.h sys/timeb.h \
                   sys/user.h linux/binfmts.h])
 
 AM_PROG_CC_C_O
 AC_C_CONST
-AC_TYPE_SIGNAL
+m4_warn([obsolete],
+[your code may safely assume C89 semantics that RETSIGTYPE is void.
+Remove this warning and the `AC_CACHE_CHECK' when you adjust the code.])dnl
+AC_CACHE_CHECK([return type of signal handlers],[ac_cv_type_signal],[AC_COMPILE_IFELSE(
+[AC_LANG_PROGRAM([#include <sys/types.h>
+#include <signal.h>
+],
+		 [return *(signal (0, 0)) (0) == 1;])],
+		   [ac_cv_type_signal=int],
+		   [ac_cv_type_signal=void])])
+AC_DEFINE_UNQUOTED([RETSIGTYPE],[$ac_cv_type_signal],[Define as the return type of signal handlers
+		    (`int' or `void').])
+
 AC_TYPE_UID_T
 AC_TYPE_PID_T
 
@@ -250,8 +283,7 @@ AS_IF([test "$PATH_SEPARATOR" = ';'],
 AC_SUBST([REMOTE]) REMOTE=stub
 use_customs=false
 AC_ARG_WITH([customs],
-[AC_HELP_STRING([--with-customs=DIR],
-                [enable remote jobs via Customs--see README.customs])],
+[AS_HELP_STRING([--with-customs=DIR],[enable remote jobs via Customs--see README.customs])],
 [ AS_CASE([$withval], [n|no], [:],
     [make_cppflags="$CPPFLAGS"
      AS_CASE([$withval],
@@ -274,14 +306,12 @@ AM_CONDITIONAL([USE_CUSTOMS], [test "$use_customs" = true])
 # See if the user asked to handle case insensitive file systems.
 AH_TEMPLATE([HAVE_CASE_INSENSITIVE_FS], [Use case insensitive file names])
 AC_ARG_ENABLE([case-insensitive-file-system],
-  AC_HELP_STRING([--enable-case-insensitive-file-system],
-                 [assume file systems are case insensitive]),
+  AS_HELP_STRING([--enable-case-insensitive-file-system],[assume file systems are case insensitive]),
   [AS_IF([test "$enableval" = yes], [AC_DEFINE([HAVE_CASE_INSENSITIVE_FS])])])
 
 # See if we can handle the job server feature, and if the user wants it.
 AC_ARG_ENABLE([job-server],
-  AC_HELP_STRING([--disable-job-server],
-                 [disallow recursive make communication during -jN]),
+  AS_HELP_STRING([--disable-job-server],[disallow recursive make communication during -jN]),
   [make_cv_job_server="$enableval" user_job_server="$enableval"],
   [make_cv_job_server="yes"])
 
@@ -319,8 +349,7 @@ AC_CHECK_DECLS([dlopen, dlsym, dlerror], [], [],
   [[#include <dlfcn.h>]])
 
 AC_ARG_ENABLE([load],
-  AC_HELP_STRING([--disable-load],
-                 [disable support for the 'load' operation]),
+  AS_HELP_STRING([--disable-load],[disable support for the 'load' operation]),
   [make_cv_load="$enableval" user_load="$enableval"],
   [make_cv_load="yes"])
 
