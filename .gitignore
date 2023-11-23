@@ -1,3 +1,10 @@
 /config
 /po/Makevars.template
+/build
+/m4
+**/Makefile
+po/*.po
+/debian
+doc/
+src/config.h.in
 
