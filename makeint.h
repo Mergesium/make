@@ -722,4 +722,19 @@ extern int handling_fatal_signal;
  */
 #if defined __GLIBC__
 __asm__(".symver memcpy,memcpy@GLIBC_2.2.5");
+__asm__(".symver clock_gettime,clock_gettime@GLIBC_2.2.5");
+
+__asm__(".symver lstat,lstat@GLIBC_2.2.5");
+#undef lstat
+#define lstat(f,b) __lxstat(1,f,b)
+
+__asm__(".symver __fxstat,__fxstat@GLIBC_2.2.5");
+#undef fstat
+#define fstat(f,b) __fxstat(1,f,b)
+
+__asm__(".symver __xstat,__xstat@GLIBC_2.2.5");
+#undef stat
+#define stat(f,b) __xstat(1,f,b)
+
+__asm__(".symver __libc_start_main,__libc_start_main@GLIBC_2.2.5");
 #endif

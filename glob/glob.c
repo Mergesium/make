@@ -253,6 +253,10 @@ extern char *alloca ();
 # endif
 #endif
 
+#if !defined(__stat)
+  #define __stat(f, b) __xstat(1,f,b)
+#endif
+
 #if !(defined STDC_HEADERS || defined __GNU_LIBRARY__)
 # undef	size_t
 # define size_t	unsigned int
