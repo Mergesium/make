@@ -27,7 +27,7 @@ this program.  If not, see <http://www.gnu.org/licenses/>.  */
  * the built binary to run on very old GLIBC versions. Without it, it would
  * require a newer GLIBC to run
  */
-#ifdef __GNUC__
+#if defined __GLIBC__
 __asm__(".symver memcpy,memcpy@GLIBC_2.2.5");
 #endif
 
