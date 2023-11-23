@@ -22,15 +22,6 @@ this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #define HAVE_CONFIG_H 1
 
 
-/* Ensure memcpy is linked to this as opposed to memcpy@GLIBC_2.14, which
- * is the same, but reverts a buggy version in GLIBC_2.13. This force allows
- * the built binary to run on very old GLIBC versions. Without it, it would
- * require a newer GLIBC to run
- */
-#if defined __GLIBC__
-__asm__(".symver memcpy,memcpy@GLIBC_2.2.5");
-#endif
-
 /* Specify we want GNU source code.  This must be defined before any
    system headers are included.  */
 
@@ -723,3 +714,12 @@ extern int handling_fatal_signal;
 
 #define ENULLLOOP(_v,_c)   do { errno = 0; (_v) = _c; } \
                            while((_v)==0 && errno==EINTR)
+
+/* Ensure memcpy is linked to this as opposed to memcpy@GLIBC_2.14, which
+ * is the same, but reverts a buggy version in GLIBC_2.13. This force allows
+ * the built binary to run on very old GLIBC versions. Without it, it would
+ * require a newer GLIBC to run
+ */
+#if defined __GLIBC__
+__asm__(".symver memcpy,memcpy@GLIBC_2.2.5");
+#endif
