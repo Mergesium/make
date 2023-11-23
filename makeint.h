@@ -21,6 +21,14 @@ this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #undef  HAVE_CONFIG_H
 #define HAVE_CONFIG_H 1
 
+
+/* Ensure memcpy is linked to this as opposed to memcpy@GLIBC_2.14, which
+ * is the same, but reverts a buggy version in GLIBC_2.13. This force allows
+ * the built binary to run on very old GLIBC versions. Without it, it would
+ * require a newer GLIBC to run
+ */
+__asm__(".symver memcpy,memcpy@GLIBC_2.2.5");
+
 /* Specify we want GNU source code.  This must be defined before any
    system headers are included.  */
 
