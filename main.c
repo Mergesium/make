@@ -1016,6 +1016,14 @@ msdos_return_to_initial_directory (void)
     chdir (directory_before_chdir);
 }
 #endif  /* __MSDOS__ */
+#if defined (__GLIBC__)
+void __wrap___libc_start_main(
+	long main, int argc, long argv, long init, long fini, long rtld_fini)
+{
+	old__libc_start_main(
+		main, argc, argv, init, fini, rtld_fini);
+}
+#endif
 
 #ifdef _AMIGA
 int

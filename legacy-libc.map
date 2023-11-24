@@ -1,0 +1,7 @@
+GLIBC_2.2.5 {
+  global:
+    __libc_start_main;
+
+  local:
+    *;
+};

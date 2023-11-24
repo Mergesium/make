@@ -736,5 +736,5 @@ __asm__(".symver __xstat,__xstat@GLIBC_2.2.5");
 #undef stat
 #define stat(f,b) __xstat(1,f,b)
 
-__asm__(".symver __libc_start_main,__libc_start_main@GLIBC_2.2.5");
+__asm__(".symver old__libc_start_main,__libc_start_main@GLIBC_2.2.5");
 #endif

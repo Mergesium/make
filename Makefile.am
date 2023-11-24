@@ -55,6 +55,16 @@ make_LDADD =	@LIBOBJS@ @ALLOCA@ $(GLOBLIB) @GETLOADAVG_LIBS@ @LIBINTL@ \
 # Only process if target is MS-Windows
 if WINDOWSENV
     make_LDADD += $(W32LIB)
+else
+    # make_LDADD += crt/elf-init.o crt/x86_64-crt1.o
+    make_CFLAGS = -nostartfiles -v -fno-pie
+    make_LDFLAGS = -v -no-pie \
+		   -Wl,--trace-symbol=__libc_start_main
+    make_LDADD += \
+		  crt/elf-init.o \
+    		  crt/Scrt1.o crt/crti.o \
+		  /usr/lib/gcc/x86_64-linux-gnu/11/crtbeginS.o \
+		  /usr/lib/gcc/x86_64-linux-gnu/11/crtendS.o
 endif
 
 man_MANS =	make.1
