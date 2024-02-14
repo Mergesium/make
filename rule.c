@@ -464,70 +464,6 @@ create_pattern_rule (const char **targets, const char **target_percents,
   if (new_pattern_rule (r, override))
     r->terminal = terminal;
 }
-
-/* Print the data base of rules.  */
 
-static void                     /* Useful to call from gdb.  */
-print_rule (struct rule *r)
-{
-  unsigned int i;
 
-  for (i = 0; i < r->num; ++i)
-    {
-      fputs (r->targets[i], stdout);
-      putchar ((i + 1 == r->num) ? ':' : ' ');
-    }
-  if (r->terminal)
-    putchar (':');
 
-  print_prereqs (r->deps);
-
-  if (r->cmds != 0)
-    print_commands (r->cmds);
-}
-
-void
-print_rule_data_base (void)
-{
-  unsigned int rules, terminal;
-  struct rule *r;
-
-  puts (_("\n# Implicit Rules"));
-
-  rules = terminal = 0;
-  for (r = pattern_rules; r != 0; r = r->next)
-    {
-      ++rules;
-
-      putchar ('\n');
-      print_rule (r);
-
-      if (r->terminal)
-        ++terminal;
-    }
-
-  if (rules == 0)
-    puts (_("\n# No implicit rules."));
-  else
-    {
-      printf (_("\n# %u implicit rules, %u"), rules, terminal);
-#ifndef NO_FLOAT
-      printf (" (%.1f%%)", (double) terminal / (double) rules * 100.0);
-#else
-      {
-        int f = (terminal * 1000 + 5) / rules;
-        printf (" (%d.%d%%)", f/10, f%10);
-      }
-#endif
-      puts (_(" terminal."));
-    }
-
-  if (num_pattern_rules != rules)
-    {
-      /* This can happen if a fatal error was detected while reading the
-         makefiles and thus count_implicit_rule_limits wasn't called yet.  */
-      if (num_pattern_rules != 0)
-        ONN (fatal, NILF, _("BUG: num_pattern_rules is wrong!  %u != %u"),
-             num_pattern_rules, rules);
-    }
-}

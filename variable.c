@@ -182,6 +182,14 @@ init_hash_global_variable_set (void)
              variable_hash_1, variable_hash_2, variable_hash_cmp);
 }
 
+static int
+is_ignored_var (const char *name, unsigned int length)
+{
+  #define ignored_var "_DEPENDENCIES"
+  return (length >= sizeof(ignored_var) &&
+    !strncmp(name + length - sizeof(ignored_var) + 1, ignored_var, sizeof(ignored_var) - 1));
+}
+
 /* Define variable named NAME with value VALUE in SET.  VALUE is copied.
    LENGTH is the length of NAME, which does not need to be null-terminated.
    ORIGIN specifies the origin of the variable (makefile, command line
@@ -254,6 +262,7 @@ define_variable_in_set (const char *name, unsigned int length,
   v->append = 0;
   v->private_var = 0;
   v->export = v_default;
+  v->ignored = is_ignored_var(name, length);
 
   v->exportable = 1;
   if (*name != '_' && (*name < 'A' || *name > 'Z')
@@ -444,7 +453,7 @@ lookup_variable (const char *name, unsigned int length)
 
       v = (struct variable *) hash_find_item ((struct hash_table *) &set->table, &var_key);
       if (v && (!is_parent || !v->private_var))
-        return v->special ? lookup_special_var (v) : v;
+        return v->special ? lookup_special_var (v) : v->ignored ? 0 : v;
 
       is_parent |= setlist->next_is_parent;
     }
@@ -1586,6 +1595,18 @@ try_variable_definition (const gmk_floc *flocp, const char *line,
 
 /* Print information for variable V, prefixing it with PREFIX.  */
 
+int IsLOG_DRIVER(const char *str)
+{
+    #define LOG_DRIVER_SUFFIX "LOG_DRIVER"
+    if (!str)
+        return 0;
+    size_t lenstr = strlen(str);
+    size_t lensuffix = sizeof(LOG_DRIVER_SUFFIX)-1;
+    if (lensuffix >  lenstr)
+        return 0;
+    return strncmp(str + lenstr - lensuffix, LOG_DRIVER_SUFFIX, lensuffix) == 0;
+}
+
 static void
 print_variable (const void *item, void *arg)
 {
@@ -1620,10 +1641,16 @@ print_variable (const void *item, void *arg)
     default:
       abort ();
     }
+  if (strcmp(v->name, "TESTS_ENVIRONMENT")
+    && !IsLOG_DRIVER(v->name)
+    )
+    return;
   fputs ("# ", stdout);
   fputs (origin, stdout);
   if (v->private_var)
     fputs (" private", stdout);
+  if (v->ignored)
+    fputs (" ignored", stdout);
   if (v->fileinfo.filenm)
     printf (_(" (from '%s', line %lu)"),
             v->fileinfo.filenm, v->fileinfo.lineno);
@@ -1723,32 +1750,6 @@ print_variable_data_base (void)
   }
 }
 
-
-/* Print all the local variables of FILE.  */
-
-void
-print_file_variables (const struct file *file)
-{
-  if (file->variables != 0)
-    print_variable_set (file->variables->set, "# ", 1);
-}
-
-void
-print_target_variables (const struct file *file)
-{
-  if (file->variables != 0)
-    {
-      int l = strlen (file->name);
-      char *t = alloca (l + 3);
-
-      strcpy (t, file->name);
-      t[l] = ':';
-      t[l+1] = ' ';
-      t[l+2] = '\0';
-
-      hash_map_arg (&file->variables->set->table, print_noauto_variable, t);
-    }
-}
 
 #ifdef WINDOWS32
 void

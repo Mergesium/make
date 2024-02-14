@@ -229,7 +229,7 @@ Use the latest mtime between symlinks and target.
 .TP 0.5i
 \fB\-n\fR, \fB\-\-just\-print\fR, \fB\-\-dry\-run\fR, \fB\-\-recon\fR
 Print the commands that would be executed, but do not execute them (except in
-certain circumstances).
+certain circumstances). \fB\-\-silent\fR also silences the recipes.
 .TP 0.5i
 \fB\-o\fR \fIfile\fR, \fB\-\-old\-file\fR=\fIfile\fR, \fB\-\-assume\-old\fR=\fIfile\fR
 Do not remake the file
@@ -334,7 +334,7 @@ even if it was turned on implicitly.
 \fB\-W\fR \fIfile\fR, \fB\-\-what\-if\fR=\fIfile\fR, \fB\-\-new\-file\fR=\fIfile\fR, \fB\-\-assume\-new\fR=\fIfile\fR
 Pretend that the target
 .I file
-has just been modified.
+has just been modified, and if no \fB\-\-assume\-old\fR given, that all other files exist and are old.
 When used with the
 .B \-n
 flag, this shows you what would happen if you were to modify that file.

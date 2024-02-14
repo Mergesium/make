@@ -54,9 +54,6 @@ void remote_cleanup (void);
 RETSIGTYPE fatal_error_signal (int sig);
 
 void print_variable_data_base (void);
-void print_dir_data_base (void);
-void print_rule_data_base (void);
-void print_vpath_data_base (void);
 
 void verify_file_data_base (void);
 
@@ -179,6 +176,7 @@ int ignore_errors_flag = 0;
    that results from reading the makefile (-p).  */
 
 int print_data_base_flag = 0;
+int default_print_data_base_flag = 0;
 
 /* Nonzero means don't remake anything; just return a nonzero status
    if the specified targets are not up to date (-q).  */
@@ -268,10 +266,12 @@ static struct stringlist *include_directories = 0;
 /* List of files given with -o switches.  */
 
 static struct stringlist *old_files = 0;
+int has_old_files_flag = 0;
 
 /* List of files given with -W switches.  */
 
 static struct stringlist *new_files = 0;
+int has_new_files_flag = 0;
 
 /* List of strings to be eval'd.  */
 static struct stringlist *eval_strings = 0;
@@ -290,6 +290,7 @@ int warn_undefined_variables_flag;
 
 static int always_make_set = 0;
 int always_make_flag = 0;
+int default_always_make_flag = 0;
 
 /* If nonzero, we're in the "try to rebuild makefiles" phase.  */
 
@@ -393,7 +394,8 @@ static const char *const usage[] =
 static const struct command_switch switches[] =
   {
     { 'b', ignore, 0, 0, 0, 0, 0, 0, 0 },
-    { 'B', flag, &always_make_set, 1, 1, 0, 0, 0, "always-make" },
+    { 'B', flag, &always_make_set, 1, 1, 0, 0, &default_always_make_flag,
+      "always-make" },
     { 'd', flag, &debug_flag, 1, 1, 0, 0, 0, 0 },
 #ifdef WINDOWS32
     { 'D', flag, &suspend_flag, 1, 1, 0, 0, 0, "suspend-for-debug" },
@@ -406,7 +408,8 @@ static const struct command_switch switches[] =
     { 'L', flag, &check_symlink_flag, 1, 1, 0, 0, 0, "check-symlink-times" },
     { 'm', ignore, 0, 0, 0, 0, 0, 0, 0 },
     { 'n', flag, &just_print_flag, 1, 1, 1, 0, 0, "just-print" },
-    { 'p', flag, &print_data_base_flag, 1, 1, 0, 0, 0, "print-data-base" },
+    { 'p', flag, &print_data_base_flag, 1, 1, 0, 0,
+      &default_print_data_base_flag, "print-data-base" },
     { 'q', flag, &question_flag, 1, 1, 1, 0, 0, "question" },
     { 'r', flag, &no_builtin_rules_flag, 1, 1, 0, 0, 0, "no-builtin-rules" },
     { 'R', flag, &no_builtin_variables_flag, 1, 1, 0, 0, 0,
@@ -2094,12 +2097,18 @@ main (int argc, char **argv, char **envp)
       const char **p;
       for (p = old_files->list; *p != 0; ++p)
         {
-          struct file *f = enter_file (*p);
+          struct file *f;
+          char *newp = xstrdup(variable_expand (*p)); // FIXME: free?
+          const char *cp = strcache_add (newp);
+          if (cp != newp) { free(newp); newp = (char*)cp; }
+          *p = newp;
+          f = enter_file (*p);
           f->last_mtime = f->mtime_before_update = OLD_MTIME;
           f->updated = 1;
           f->update_status = us_success;
           f->command_state = cs_finished;
         }
+      has_old_files_flag = 1;
     }
 
   if (!restarts && new_files != 0)
@@ -2107,9 +2116,15 @@ main (int argc, char **argv, char **envp)
       const char **p;
       for (p = new_files->list; *p != 0; ++p)
         {
-          struct file *f = enter_file (*p);
+          struct file *f;
+          char *newp = xstrdup(variable_expand (*p)); // FIXME: free?
+          const char *cp = strcache_add (newp);
+          if (cp != newp) { free(newp); newp = (char*)cp; }
+          *p = newp;
+          f = enter_file (*p);
           f->last_mtime = f->mtime_before_update = NEW_MTIME;
         }
+      has_new_files_flag = 1;
     }
 
   /* Initialize the remote job module.  */
@@ -2189,11 +2204,16 @@ main (int argc, char **argv, char **envp)
       }
 
       /* Set up 'MAKEFLAGS' specially while remaking makefiles.  */
+      /* mask the always_make when submakes regen makefiles if --just-print */
+      default_always_make_flag = always_make_set & just_print_flag;
+      default_print_data_base_flag = print_data_base_flag;
       define_makeflags (1, 1);
 
       rebuilding_makefiles = 1;
       status = update_goal_chain (read_files);
       rebuilding_makefiles = 0;
+      default_always_make_flag = 0;
+      default_print_data_base_flag = 0;
 
       switch (status)
         {
@@ -2284,9 +2304,6 @@ main (int argc, char **argv, char **envp)
           /* Updated successfully.  Re-exec ourselves.  */
 
           remove_intermediates (0);
-
-          if (print_data_base_flag)
-            print_data_base ();
 
           clean_jobserver (0);
 
@@ -3313,10 +3330,7 @@ print_data_base ()
   printf (_("\n# Make data base, printed on %s"), ctime (&when));
 
   print_variable_data_base ();
-  print_dir_data_base ();
-  print_rule_data_base ();
   print_file_data_base ();
-  print_vpath_data_base ();
   strcache_print_stats ("#");
 
   when = time ((time_t *) 0);
