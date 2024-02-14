@@ -174,7 +174,7 @@ void file_timestamp_sprintf (char *p, FILE_TIMESTAMP ts);
 #define file_mtime_no_search(f) file_mtime_1 ((f), 0)
 FILE_TIMESTAMP f_mtime (struct file *file, int search);
 #define file_mtime_1(f, v) \
-  ((f)->last_mtime == UNKNOWN_MTIME ? f_mtime ((f), v) : (f)->last_mtime)
+  ((f)->last_mtime == UNKNOWN_MTIME ? (has_new_files_flag && !has_old_files_flag ? OLD_MTIME : f_mtime ((f), v)) : (f)->last_mtime)
 
 /* Special timestamp values.  */
 

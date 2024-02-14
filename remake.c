@@ -117,6 +117,10 @@ update_goal_chain (struct dep *goals)
 
       reap_children (1, 0);
 
+      if (rebuilding_makefiles)
+        /* --just-print clears --always-make for makefiles */
+        always_make_flag = always_make_flag & !just_print_flag;
+
       lastgoal = 0;
       g = goals;
       while (g != 0)
@@ -1460,6 +1464,9 @@ name_mtime (const char *name)
   FILE_TIMESTAMP mtime;
   struct stat st;
   int e;
+
+  if (has_new_files_flag && !has_old_files_flag)
+    return OLD_MTIME;
 
   EINTRLOOP (e, stat (name, &st));
   if (e == 0)

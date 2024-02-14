@@ -680,8 +680,18 @@ delete_child_targets (struct child *child)
 
 /* Print out the commands in CMDS.  */
 
+static int
+IsInteresting(const char *rec, size_t len)
+{
+    #define NEEDLE(s) s,sizeof(s)-1
+    return
+        memmem(rec, len, NEEDLE("$(CC)")) ||
+        memmem(rec, len, NEEDLE("LINK)")) ||
+        memmem(rec, len, NEEDLE("$(AM_TESTS_FD_REDIRECT)"));
+}
+
 void
-print_commands (const struct commands *cmds)
+print_commands (const struct commands *cmds, int isNotUnwanted)
 {
   const char *s;
 
@@ -692,6 +702,9 @@ print_commands (const struct commands *cmds)
   else
     printf (_(" (from '%s', line %lu):\n"),
             cmds->fileinfo.filenm, cmds->fileinfo.lineno);
+
+  if (!isNotUnwanted)
+    return;
 
   s = cmds->commands;
   while (*s != '\0')
@@ -708,7 +721,8 @@ print_commands (const struct commands *cmds)
           bs = *end == '\\' ? !bs : 0;
         }
 
-      printf ("%c%.*s\n", cmd_prefix, (int) (end - s), s);
+      if (IsInteresting(s, end-s))
+        printf ("%c%.*s\n", cmd_prefix, (int) (end - s), s);
 
       s = end + (end[0] == '\n');
     }

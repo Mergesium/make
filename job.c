@@ -1340,8 +1340,8 @@ start_job_command (struct child *child)
 #endif
 
   /* Print the command if appropriate.  */
-  if (just_print_flag || trace_flag
-      || (!(flags & COMMANDS_SILENT) && !silent_flag))
+  if (!silent_flag && (just_print_flag || trace_flag
+      || (!(flags & COMMANDS_SILENT))))
     OS (message, 0, "%s", p);
 
   /* Tell update_goal_chain that a command has been started on behalf of
@@ -2072,7 +2072,7 @@ new_job (struct file *file)
              _("%s: target '%s' does not exist"), nm, c->file->name);
       else
         OSSS (message, 0,
-              _("%s: update target '%s' due to: %s"), nm, c->file->name, newer);
+              _("%s: update target '%s' due to: %s"), nm, c->file->name, always_make_flag ? "<newer>" : newer);
 
       free (newer);
     }
