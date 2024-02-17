@@ -927,6 +927,77 @@ print_prereqs (const struct dep *deps)
   putchar ('\n');
 }
 
+static int
+IsNotLog(const char *string)
+{
+  string = strrchr(string, '.');
+
+  if (string != NULL)
+    return strcmp(string, ".log");
+
+  return -1;
+}
+
+static int
+IsNotPo(const char *string)
+{
+  string = strrchr(string, '.');
+
+  if (string != NULL)
+    return strcmp(string, ".po");
+
+  return -1;
+}
+
+static int
+IsNotUnwantedFile(const char *string)
+{
+  string = strrchr(string, '.');
+
+  /* files with single letter extension. */
+  if (string != NULL) {
+    string++;
+    if (*string) {
+      if ((*string == 'o' || *string == 'a') && !*(string+1))
+        return 1;
+      if (!*(string+1))
+        return 0;
+    }
+    return
+        strcmp(string, "sh") &&
+        strcmp(string, "po") &&
+        strcmp(string, "pot")
+        ;
+  }
+
+  return -1;
+}
+
+static int
+IsNotUnwantedRecipe(const char *string)
+{
+  string = strrchr(string, '.');
+
+  /* files with single letter extension. */
+  if (string != NULL) {
+    string++;
+    if (*string) {
+      if ((*string == 'o' || *string == 'a') && !*(string+1))
+        return 1;
+      if (!*(string+1))
+        return 0;
+    }
+    return /* Don't want */
+        strcmp(string, "log") &&
+        strcmp(string, "sh") &&
+        strcmp(string, "po") &&
+        strcmp(string, "pot")
+        ;
+  }
+
+  return -1; /* no dot? want. could be program */
+}
+
 static void
 print_file (const void *item)
 {
@@ -937,6 +1008,12 @@ print_file (const void *item)
      Ideally we'd be able to delete them altogether but currently there's no
      facility to ever delete a file once it's been added.  */
   if (no_builtin_rules_flag && f->builtin)
+    return;
+
+  if (!f->is_target)
+    return;
+
+  if (!IsNotUnwantedFile(f->name))
     return;
 
   putchar ('\n');
@@ -950,31 +1027,17 @@ print_file (const void *item)
       putchar ('\n');
     }
 
-  if (f->variables != 0)
-    print_target_variables (f);
-
   if (!f->is_target)
     puts (_("# Not a target:"));
   printf ("%s:%s", f->name, f->double_colon ? ":" : "");
-  print_prereqs (f->deps);
 
-  if (f->precious)
-    puts (_("#  Precious file (prerequisite of .PRECIOUS)."));
-  if (f->phony)
-    puts (_("#  Phony target (prerequisite of .PHONY)."));
-  if (f->cmd_target)
-    puts (_("#  Command line target."));
-  if (f->dontcare)
-    puts (_("#  A default, MAKEFILES, or -include/sinclude makefile."));
+  if (IsNotLog(f->name))
+    puts (" <trimmed>");
+  else
+    print_prereqs (f->deps);
+
   if (f->builtin)
     puts (_("#  Builtin rule"));
-  puts (f->tried_implicit
-        ? _("#  Implicit rule search has been done.")
-        : _("#  Implicit rule search has not been done."));
-  if (f->stem != 0)
-    printf (_("#  Implicit/static pattern stem: '%s'\n"), f->stem);
-  if (f->intermediate)
-    puts (_("#  File is an intermediate prerequisite."));
   if (f->also_make != 0)
     {
       const struct dep *d;
@@ -983,20 +1046,6 @@ print_file (const void *item)
         printf (" %s", dep_name (d));
       putchar ('\n');
     }
-  if (f->last_mtime == UNKNOWN_MTIME)
-    puts (_("#  Modification time never checked."));
-  else if (f->last_mtime == NONEXISTENT_MTIME)
-    puts (_("#  File does not exist."));
-  else if (f->last_mtime == OLD_MTIME)
-    puts (_("#  File is very old."));
-  else
-    {
-      char buf[FILE_TIMESTAMP_PRINT_LEN_BOUND + 1];
-      file_timestamp_sprintf (buf, f->last_mtime);
-      printf (_("#  Last modified %s\n"), buf);
-    }
-  puts (f->updated
-        ? _("#  File has been updated.") : _("#  File has not been updated."));
   switch (f->command_state)
     {
     case cs_running:
@@ -1009,15 +1058,6 @@ print_file (const void *item)
     case cs_finished:
       switch (f->update_status)
         {
-        case us_none:
-          break;
-        case us_success:
-          puts (_("#  Successfully updated."));
-          break;
-        case us_question:
-          assert (question_flag);
-          puts (_("#  Needs to be updated (-q is set)."));
-          break;
         case us_failed:
           puts (_("#  Failed to be updated."));
           break;
@@ -1030,11 +1070,8 @@ print_file (const void *item)
       abort ();
     }
 
-  if (f->variables != 0)
-    print_file_variables (f);
-
   if (f->cmds != 0)
-    print_commands (f->cmds);
+    print_commands (f->cmds, IsNotUnwantedRecipe(f->name));
 
   if (f->prev)
     print_file ((const void *) f->prev);
