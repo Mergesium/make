@@ -930,6 +930,7 @@ print_prereqs (const struct dep *deps)
 static int
 IsNotLog(const char *string)
 {
+  return 0; // temp - this fn should be "Is not irrelevant - only filter out known useless targets"
   string = strrchr(string, '.');
 
   if (string != NULL)
