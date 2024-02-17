@@ -181,6 +181,7 @@ int ignore_errors_flag = 0;
    that results from reading the makefile (-p).  */
 
 int print_data_base_flag = 0;
+int default_print_data_base_flag = 0;
 
 /* Nonzero means don't remake anything; just return a nonzero status
    if the specified targets are not up to date (-q).  */
@@ -410,7 +411,8 @@ static const struct command_switch switches[] =
     { 'L', flag, &check_symlink_flag, 1, 1, 0, 0, 0, "check-symlink-times" },
     { 'm', ignore, 0, 0, 0, 0, 0, 0, 0 },
     { 'n', flag, &just_print_flag, 1, 1, 1, 0, 0, "just-print" },
-    { 'p', flag, &print_data_base_flag, 1, 1, 0, 0, 0, "print-data-base" },
+    { 'p', flag, &print_data_base_flag, 1, 1, 0, 0,
+      &default_print_data_base_flag, "print-data-base" },
     { 'q', flag, &question_flag, 1, 1, 1, 0, 0, "question" },
     { 'r', flag, &no_builtin_rules_flag, 1, 1, 0, 0, 0, "no-builtin-rules" },
     { 'R', flag, &no_builtin_variables_flag, 1, 1, 0, 0, 0,
@@ -2195,12 +2197,14 @@ main (int argc, char **argv, char **envp)
       /* Set up 'MAKEFLAGS' specially while remaking makefiles.  */
       /* mask the always_make when submakes regen makefiles if --just-print */
       default_always_make_flag = always_make_set & just_print_flag;
+      default_print_data_base_flag = print_data_base_flag;
       define_makeflags (1, 1);
 
       rebuilding_makefiles = 1;
       status = update_goal_chain (read_files);
       rebuilding_makefiles = 0;
       default_always_make_flag = 0;
+      default_print_data_base_flag = 0;
 
       switch (status)
         {
@@ -2291,9 +2295,6 @@ main (int argc, char **argv, char **envp)
           /* Updated successfully.  Re-exec ourselves.  */
 
           remove_intermediates (0);
-
-          if (print_data_base_flag)
-            print_data_base ();
 
           clean_jobserver (0);
 
