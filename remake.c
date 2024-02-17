@@ -1467,6 +1467,9 @@ name_mtime (const char *name)
   struct stat st;
   int e;
 
+  if (has_new_files_flag && !has_old_files_flag)
+    return OLD_MTIME;
+
   EINTRLOOP (e, stat (name, &st));
   if (e == 0)
     mtime = FILE_TIMESTAMP_STAT_MODTIME (name, st);

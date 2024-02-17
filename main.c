@@ -271,10 +271,12 @@ static struct stringlist *include_directories = 0;
 /* List of files given with -o switches.  */
 
 static struct stringlist *old_files = 0;
+int has_old_files_flag = 0;
 
 /* List of files given with -W switches.  */
 
 static struct stringlist *new_files = 0;
+int has_new_files_flag = 0;
 
 /* List of strings to be eval'd.  */
 static struct stringlist *eval_strings = 0;
@@ -2111,6 +2113,7 @@ main (int argc, char **argv, char **envp)
           f->update_status = us_success;
           f->command_state = cs_finished;
         }
+      has_old_files_flag = 1;
     }
 
   if (!restarts && new_files != 0)
@@ -2126,6 +2129,7 @@ main (int argc, char **argv, char **envp)
           f = enter_file (*p);
           f->last_mtime = f->mtime_before_update = NEW_MTIME;
         }
+      has_new_files_flag = 1;
     }
 
   /* Initialize the remote job module.  */
