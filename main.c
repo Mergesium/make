@@ -292,6 +292,7 @@ int warn_undefined_variables_flag;
 
 static int always_make_set = 0;
 int always_make_flag = 0;
+int default_always_make_flag = 0;
 
 /* If nonzero, we're in the "try to rebuild makefiles" phase.  */
 
@@ -395,7 +396,8 @@ static const char *const usage[] =
 static const struct command_switch switches[] =
   {
     { 'b', ignore, 0, 0, 0, 0, 0, 0, 0 },
-    { 'B', flag, &always_make_set, 1, 1, 0, 0, 0, "always-make" },
+    { 'B', flag, &always_make_set, 1, 1, 0, 0, &default_always_make_flag,
+      "always-make" },
     { 'd', flag, &debug_flag, 1, 1, 0, 0, 0, 0 },
 #ifdef WINDOWS32
     { 'D', flag, &suspend_flag, 1, 1, 0, 0, 0, "suspend-for-debug" },
@@ -2191,11 +2193,14 @@ main (int argc, char **argv, char **envp)
       }
 
       /* Set up 'MAKEFLAGS' specially while remaking makefiles.  */
+      /* mask the always_make when submakes regen makefiles if --just-print */
+      default_always_make_flag = always_make_set & just_print_flag;
       define_makeflags (1, 1);
 
       rebuilding_makefiles = 1;
       status = update_goal_chain (read_files);
       rebuilding_makefiles = 0;
+      default_always_make_flag = 0;
 
       switch (status)
         {

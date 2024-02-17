@@ -119,6 +119,10 @@ update_goal_chain (struct dep *goals)
 
       reap_children (1, 0);
 
+      if (rebuilding_makefiles)
+        /* --just-print clears --always-make for makefiles */
+        always_make_flag = always_make_flag & !just_print_flag;
+
       lastgoal = 0;
       g = goals;
       while (g != 0)
