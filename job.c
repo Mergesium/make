@@ -1342,8 +1342,8 @@ start_job_command (struct child *child)
 #endif
 
   /* Print the command if appropriate.  */
-  if (just_print_flag || trace_flag
-      || (!(flags & COMMANDS_SILENT) && !silent_flag))
+  if (!silent_flag && (just_print_flag || trace_flag
+      || (!(flags & COMMANDS_SILENT))))
     OS (message, 0, "%s", p);
 
   /* Tell update_goal_chain that a command has been started on behalf of
