@@ -208,12 +208,11 @@ my_realloc (p, n)
 #endif /* __GNU_LIBRARY__ || __DJGPP__ */
 
 
-#if !defined __alloca && !defined __GNU_LIBRARY__
-
 # ifdef	__GNUC__
 #  undef alloca
 #  define alloca(n)	__builtin_alloca (n)
 # else	/* Not GCC.  */
+#if !defined __alloca && !defined __GNU_LIBRARY__
 #  ifdef HAVE_ALLOCA_H
 #   include <alloca.h>
 #  else	/* Not HAVE_ALLOCA_H.  */
@@ -225,11 +224,10 @@ extern char *alloca ();
 #    endif /* WINDOWS32 */
 #   endif /* Not _AIX.  */
 #  endif /* sparc or HAVE_ALLOCA_H.  */
+#endif
 # endif	/* GCC.  */
 
 # define __alloca	alloca
-
-#endif
 
 #ifndef __GNU_LIBRARY__
 # define __stat stat
