@@ -1,6 +1,8 @@
 /* Argument parsing and main program of GNU Make.
 Copyright (C) 1988-2014 Free Software Foundation, Inc.
+Copyright (C) 2023-2024 Mergesium, Inc.
 This file is part of GNU Make.
+This file is also part of Mergesium Dry-Runner, a derivative work of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify it under the
 terms of the GNU General Public License as published by the Free Software
@@ -846,7 +848,7 @@ handle_runtime_exceptions (struct _EXCEPTION_POINTERS *exinfo)
 
   /* turn this on if we want to put stuff in the event log too */
 #ifdef USE_EVENT_LOG
-  hEventSource = RegisterEventSource (NULL, "GNU Make");
+  hEventSource = RegisterEventSource (NULL, "Mergesium Dry-Runner");
   lpszStrings[0] = errmsg;
 
   if (hEventSource != NULL)
@@ -2728,7 +2730,7 @@ print_usage (int bad)
     fprintf (usageto, _("\nThis program built for %s (%s)\n"),
              make_host, remote_description);
 
-  fprintf (usageto, _("Report bugs to <bug-make@gnu.org>\n"));
+  fprintf (usageto, _("Report bugs to " PACKAGE_BUGREPORT "\n"));
 }
 
 /* Decode switches from ARGC and ARGV.
@@ -3273,7 +3275,8 @@ print_version (void)
     /* Do it only once.  */
     return;
 
-  printf ("%sGNU Make %s\n", precede, version_string);
+  printf ("%sMergesium Dry-Runner %s\n", precede, version_string);
+  printf ("%sA derivative work of GNU Make %s\n", precede, version_string);
 
   if (!remote_description || *remote_description == '\0')
     printf (_("%sBuilt for %s\n"), precede, make_host);
@@ -3287,6 +3290,9 @@ print_version (void)
      word "Copyright"), so it hardly seems worth it.  */
 
   printf ("%sCopyright (C) 1988-2014 Free Software Foundation, Inc.\n",
+          precede);
+
+  printf ("%sCopyright (C) 2023-2024 Mergesium, Inc.\n",
           precede);
 
   printf (_("%sLicense GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>\n\

@@ -1,5 +1,6 @@
 /* hash.c -- hash table maintenance
 Copyright (C) 1995, 1999, 2002, 2010 Free Software Foundation, Inc.
+Copyright (C) 2023-2024 Mergesium, Inc.
 Written by Greg McGary <gkm@gnu.org> <greg@mcgary.org>
 
 GNU Make is free software; you can redistribute it and/or modify it under the

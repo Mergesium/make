@@ -1,7 +1,9 @@
 # Process this file with autoconf to produce a configure script.
 #
 # Copyright (C) 1993-2014 Free Software Foundation, Inc.
+# Copyright (C) 2023-2024 Mergesium, Inc.
 # This file is part of GNU Make.
+# This file is also part of Mergesium Dry-Runner, a derivative work of GNU Make.
 #
 # GNU Make is free software; you can redistribute it and/or modify it under
 # the terms of the GNU General Public License as published by the Free Software
@@ -16,7 +18,10 @@
 # You should have received a copy of the GNU General Public License along with
 # this program.  If not, see <http://www.gnu.org/licenses/>.
 
-AC_INIT([GNU make],[4.1],[bug-make@gnu.org])
+AC_INIT([Mergesium Dry-Runner],[4.1],
+    [https://github.com/Mergesium/make/issues],
+    [dryrun],
+    [https://autotools.Mergesium.com])
 
 AC_PREREQ([2.62])
 

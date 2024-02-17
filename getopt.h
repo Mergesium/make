@@ -1,5 +1,6 @@
 /* Declarations for getopt.
 Copyright (C) 1989-2014 Free Software Foundation, Inc.
+Copyright (C) 2023-2024 Mergesium, Inc.
 
 NOTE: The canonical source of this file is maintained with the GNU C Library.
 Bugs can be reported to bug-glibc@gnu.org.

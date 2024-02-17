@@ -4,6 +4,7 @@ NOTE: getopt is now part of the C library, so if you don't know what
 before changing it!
 
 Copyright (C) 1987-2014 Free Software Foundation, Inc.
+Copyright (C) 2023-2024 Mergesium, Inc.
 
 NOTE: The canonical source of this file is maintained with the GNU C Library.
 Bugs can be reported to bug-glibc@gnu.org.

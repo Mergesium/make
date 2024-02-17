@@ -1,6 +1,8 @@
 /* vmsify.c -- Module for vms <-> unix file name conversion
 Copyright (C) 1996-2014 Free Software Foundation, Inc.
+Copyright (C) 2023-2024 Mergesium, Inc.
 This file is part of GNU Make.
+This file is also part of Mergesium Dry-Runner, a derivative work of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify it under the
 terms of the GNU General Public License as published by the Free Software
@@ -14,7 +16,7 @@ A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 You should have received a copy of the GNU General Public License along with
 this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-/* Written by Klaus Kämpf (kkaempf@progis.de)
+/* Written by Klaus Kï¿½mpf (kkaempf@progis.de)
    of proGIS Software, Aachen, Germany */
 
 
