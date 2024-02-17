@@ -2100,7 +2100,12 @@ main (int argc, char **argv, char **envp)
       const char **p;
       for (p = old_files->list; *p != 0; ++p)
         {
-          struct file *f = enter_file (*p);
+          struct file *f;
+          char *newp = xstrdup(variable_expand (*p)); // FIXME: free?
+          const char *cp = strcache_add (newp);
+          if (cp != newp) { free(newp); newp = (char*)cp; }
+          *p = newp;
+          f = enter_file (*p);
           f->last_mtime = f->mtime_before_update = OLD_MTIME;
           f->updated = 1;
           f->update_status = us_success;
@@ -2113,7 +2118,12 @@ main (int argc, char **argv, char **envp)
       const char **p;
       for (p = new_files->list; *p != 0; ++p)
         {
-          struct file *f = enter_file (*p);
+          struct file *f;
+          char *newp = xstrdup(variable_expand (*p)); // FIXME: free?
+          const char *cp = strcache_add (newp);
+          if (cp != newp) { free(newp); newp = (char*)cp; }
+          *p = newp;
+          f = enter_file (*p);
           f->last_mtime = f->mtime_before_update = NEW_MTIME;
         }
     }
