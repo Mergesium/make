@@ -688,7 +688,6 @@ IsInteresting(const char *rec, size_t len)
     #define NEEDLE(s) s,sizeof(s)-1
     return
         memmem(rec, len, NEEDLE("$(CC)")) ||
-        memmem(rec, len, NEEDLE("$(RANLIB)")) ||
         memmem(rec, len, NEEDLE("LINK)")) ||
         memmem(rec, len, NEEDLE("$(AM_TESTS_FD_REDIRECT)"));
 }

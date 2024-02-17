@@ -958,12 +958,15 @@ IsNotUnwantedFile(const char *string)
   if (string != NULL) {
     string++;
     if (*string) {
-      if ((*string == 'o' || *string == 'a') && !*(string+1))
+      if ((*string == 'o') && !*(string+1))
         return 1;
       if (!*(string+1))
         return 0;
     }
     return
+        strcmp(string, "dll") &&
+        strcmp(string, "so") &&
+        strcmp(string, "la") &&
         strcmp(string, "sh") &&
         strcmp(string, "po") &&
         strcmp(string, "pot")
