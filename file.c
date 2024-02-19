@@ -959,7 +959,7 @@ IsNotUnwantedFile(const char *string)
   if (string != NULL) {
     string++;
     if (*string) {
-      if ((*string == 'o') && !*(string+1))
+      if ((*string == 'o' || *string == 'a') && !*(string+1))
         return 1;
       if (!*(string+1))
         return 0;
