@@ -184,14 +184,6 @@ init_hash_global_variable_set (void)
              variable_hash_1, variable_hash_2, variable_hash_cmp);
 }
 
-static int
-is_ignored_var (const char *name, unsigned int length)
-{
-  #define ignored_var "_DEPENDENCIES"
-  return (length >= sizeof(ignored_var) &&
-    !strncmp(name + length - sizeof(ignored_var) + 1, ignored_var, sizeof(ignored_var) - 1));
-}
-
 /* Define variable named NAME with value VALUE in SET.  VALUE is copied.
    LENGTH is the length of NAME, which does not need to be null-terminated.
    ORIGIN specifies the origin of the variable (makefile, command line
@@ -264,7 +256,6 @@ define_variable_in_set (const char *name, unsigned int length,
   v->append = 0;
   v->private_var = 0;
   v->export = v_default;
-  v->ignored = is_ignored_var(name, length);
 
   v->exportable = 1;
   if (*name != '_' && (*name < 'A' || *name > 'Z')
@@ -455,7 +446,7 @@ lookup_variable (const char *name, unsigned int length)
 
       v = (struct variable *) hash_find_item ((struct hash_table *) &set->table, &var_key);
       if (v && (!is_parent || !v->private_var))
-        return v->special ? lookup_special_var (v) : v->ignored ? 0 : v;
+        return v->special ? lookup_special_var (v) : v;
 
       is_parent |= setlist->next_is_parent;
     }
@@ -1651,8 +1642,6 @@ print_variable (const void *item, void *arg)
   fputs (origin, stdout);
   if (v->private_var)
     fputs (" private", stdout);
-  if (v->ignored)
-    fputs (" ignored", stdout);
   if (v->fileinfo.filenm)
     printf (_(" (from '%s', line %lu)"),
             v->fileinfo.filenm, v->fileinfo.lineno);

@@ -66,7 +66,6 @@ struct variable
     unsigned int expanding:1;   /* Nonzero if currently being expanded.  */
     unsigned int private_var:1; /* Nonzero avoids inheritance of this
                                    target-specific variable.  */
-    unsigned int ignored:1;     /* Nonzero if this variable is ignored.  */
     unsigned int exp_count:EXP_COUNT_BITS;
                                 /* If >1, allow this many self-referential
                                    expansions.  */
