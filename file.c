@@ -966,8 +966,6 @@ IsNotUnwantedFile(const char *string)
     }
     return
         strcmp(string, "dll") &&
-        strcmp(string, "so") &&
-        strcmp(string, "la") &&
         strcmp(string, "sh") &&
         strcmp(string, "po") &&
         strcmp(string, "pot")
