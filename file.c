@@ -1012,10 +1012,10 @@ print_file (const void *item)
   if (no_builtin_rules_flag && f->builtin)
     return;
 
-  if (!f->is_target)
+  if (!f->is_target && !(f->command_state == cs_finished && f->update_status == us_failed) )
     return;
 
-  if (!IsNotUnwantedFile(f->name))
+  if (f->is_target && !IsNotUnwantedFile(f->name))
     return;
 
   putchar ('\n');
@@ -1073,7 +1073,7 @@ print_file (const void *item)
     }
 
   if (f->cmds != 0)
-    print_commands (f->cmds, IsNotUnwantedRecipe(f->name));
+    print_commands (f->cmds, !f->is_target || IsNotUnwantedRecipe(f->name));
 
   if (f->prev)
     print_file ((const void *) f->prev);
