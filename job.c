@@ -1342,8 +1342,8 @@ start_job_command (struct child *child)
 #endif
 
   /* Print the command if appropriate.  */
-  if (!silent_flag && (just_print_flag || trace_flag
-      || (!(flags & COMMANDS_SILENT))))
+  if (!silent_flag && ((just_print_flag || trace_flag
+      || (!(flags & COMMANDS_SILENT))) && !IsAlwaysUnwantedFile(child->file->name)))
     OS (message, 0, "%s", p);
 
   /* Tell update_goal_chain that a command has been started on behalf of
@@ -2055,7 +2055,7 @@ new_job (struct file *file)
 
   /* Trace the build.
      Use message here so that changes to working directories are logged.  */
-  if (trace_flag)
+  if (trace_flag && !IsAlwaysUnwantedFile(c->file->name))
     {
       char *newer = allocated_variable_expand_for_file ("$?", c->file);
       const char *nm;

@@ -950,25 +950,144 @@ IsNotPo(const char *string)
   return -1;
 }
 
+/* Keep them sorted, they are searched with bsearch */
+const char *unwanted_files[] = {
+    ".INTERMEDIATE",
+    ".MAKE",
+    ".NOEXPORT",
+    ".PHONY",
+    ".PRECIOUS",
+    ".SUFFIXES",
+    ".c.o",
+    ".c.obj",
+    ".dirstamp",
+    ".log.trs",
+    ".s.lo",
+    ".s.obj",
+    ".test.log",
+    "CTAGS",
+    "GTAGS",
+    "ID",
+    "Makefile",
+    "TAGS",
+    "all",
+    "am--fnord",
+    "am--force-recheck",
+    "am--refresh",
+    "check",
+    "check-TESTS",
+    "clean",
+    "clean-generic",
+    "clean-libtool",
+    "clean-libLTLIBRARIES",
+    "clean-noinstPROGRAMS",
+    "clean-noinstLTLIBRARIES",
+    "clean-scope",
+    "config.status",
+    "cscope",
+    "cscope.files",
+    "cscopelist",
+    "ctags",
+    "dist",
+    "dist-all",
+    "dist-bzip2",
+    "dist-gzip",
+    "dist-hook",
+    "dist-lzip",
+    "dist-shar",
+    "dist-tarZ",
+    "dist-xz",
+    "dist-zip",
+    "distcheck",
+    "distclean",
+    "distclean-compile",
+    "distclean-generic",
+    "distclean-libtool",
+    "distclean-tags",
+    "distcleancheck",
+    "distdir",
+    "distuninstallcheck",
+    "docs",
+    "dvi",
+    "html",
+    "info",
+    "install",
+    "install-data",
+    "install-exec",
+    "install-html",
+    "install-includeHEADERS",
+    "install-info",
+    "install-libLTLIBRARIES",
+    "install-man",
+    "install-pdf",
+    "install-pkgconfigDATA",
+    "install-ps",
+    "install-strip",
+    "installcheck",
+    "installdirs",
+    "maintainer-clean",
+    "maintainer-clean-generic",
+    "mostlyclean",
+    "mostlyclean-compile",
+    "mostlyclean-generic",
+    "mostlyclean-libtool",
+    "pdf",
+    "ps",
+    "recheck",
+    "tags",
+    "uninstall",
+    "uninstall-includeHEADERS",
+    "uninstall-libLTLIBRARIES",
+    "uninstall-pkgconfigDATA",
+};
+
+#define ARRAY_SIZE(a)                               \
+  ((sizeof(a) / sizeof(*(a))))
+
+static int cmp(const void *_a, const void *_b) {
+    const char *a = _a;
+    const char *b = *((const char**)_b);
+    return strcmp(a,b);
+}
+
+int
+IsAlwaysUnwantedFile(const char *string)
+{
+  const char *s;
+
+  if ((s = strrchr(string, '-'))) {
+    if (!(
+        strcmp(s, "-am") &&
+        strcmp(s, "-recursive"))) return 1;
+  } else if ((s = strrchr(string, '/'))) {
+    if (!(
+        strcmp(s, "/.dirstamp") &&
+        strcmp(s, "/config.status") &&
+        strcmp(s, "/configure") &&
+        strcmp(s, "/configure.ac"))) return 1;
+  }
+  return !!bsearch(string, unwanted_files, ARRAY_SIZE(unwanted_files), sizeof(unwanted_files[0]), cmp);
+}
+
 static int
 IsNotUnwantedFile(const char *string)
 {
-  string = strrchr(string, '.');
+  const char *s = strrchr(string, '.');
 
   /* files with single letter extension. */
-  if (string != NULL) {
-    string++;
-    if (*string) {
-      if ((*string == 'o' || *string == 'a') && !*(string+1))
+  if (s != NULL) {
+    s++;
+    if (*s) {
+      if ((*s == 'o' || *s == 'a') && !*(s+1))
         return 1;
-      if (!*(string+1))
+      if (!*(s+1))
         return 0;
     }
     return
-        strcmp(string, "dll") &&
-        strcmp(string, "sh") &&
-        strcmp(string, "po") &&
-        strcmp(string, "pot")
+        strcmp(s, "dll") &&
+        strcmp(s, "sh") &&
+        strcmp(s, "po") &&
+        strcmp(s, "pot")
         ;
   }
 
@@ -978,23 +1097,27 @@ IsNotUnwantedFile(const char *string)
 static int
 IsNotUnwantedRecipe(const char *string)
 {
-  string = strrchr(string, '.');
+  const char *s = strrchr(string, '.');
 
   /* files with single letter extension. */
-  if (string != NULL) {
-    string++;
-    if (*string) {
-      if ((*string == 'o' || *string == 'a') && !*(string+1))
+  if (s != NULL) {
+    s++;
+    if (*s) {
+      if ((*s == 'o' || *s == 'a') && !*(s+1))
         return 1;
-      if (!*(string+1))
+      if (!*(s+1))
         return 0;
     }
-    return /* Don't want */
-        strcmp(string, "log") &&
-        strcmp(string, "sh") &&
-        strcmp(string, "po") &&
-        strcmp(string, "pot")
+    int wanted = /* Don't want */
+        strcmp(s, "log") &&
+        strcmp(s, "sh") &&
+        strcmp(s, "po") &&
+        strcmp(s, "pot")
         ;
+    if (!wanted) return wanted;
+  } else if ((s = strrchr(string, '-'))) {
+    return
+        strcmp(s, "-recursive");
   }
 
   return -1; /* no dot? want. could be program */
@@ -1015,7 +1138,7 @@ print_file (const void *item)
   if (!f->is_target && !(f->command_state == cs_finished && f->update_status == us_failed) )
     return;
 
-  if (f->is_target && !IsNotUnwantedFile(f->name))
+  if ((f->is_target && !IsNotUnwantedFile(f->name)) || IsAlwaysUnwantedFile(f->name))
     return;
 
   putchar ('\n');
@@ -1073,7 +1196,7 @@ print_file (const void *item)
     }
 
   if (f->cmds != 0)
-    print_commands (f->cmds, !f->is_target || IsNotUnwantedRecipe(f->name));
+    print_commands (f->cmds, /* !f->is_target || */ IsNotUnwantedRecipe(f->name));
 
   if (f->prev)
     print_file ((const void *) f->prev);
