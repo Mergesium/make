@@ -795,6 +795,11 @@ update_file_1 (struct file *file, unsigned int depth)
       DBF (DB_VERBOSE,
            _("No recipe for '%s' and no prerequisites actually changed.\n"));
     }
+  else if ((has_new_files_flag && file->last_mtime == NEW_MTIME))
+    {
+      must_make = 0;
+      DBF (DB_VERBOSE, _("Not making '%s' due to assume-new flag.\n"));
+    }
   else if (!must_make && file->cmds != 0 && always_make_flag)
     {
       must_make = 1;
