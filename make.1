@@ -1,6 +1,6 @@
-.TH MAKE 1 "03 March 2012" "GNU" "User Commands"
+.TH MAKE 1 "28 February 2016" "GNU" "User Commands"
 .SH NAME
-make \- GNU make utility to maintain groups of programs
+make \- GNU Make utility to maintain groups of programs
 .SH SYNOPSIS
 .B make
 [\fIOPTION\fR]... [\fITARGET\fR]...
@@ -26,9 +26,9 @@ To prepare to use
 .BR make ,
 you must write a file called the
 .I makefile
-that describes the relationships among files in your program, and the states
-the commands for updating each file.  In a program, typically the executable
-file is updated from object files, which are in turn made by compiling source
+that describes the relationships among files in your program, and provides
+commands for updating each file.  In a program, typically the executable file
+is updated from object files, which are in turn made by compiling source
 files.
 .LP
 Once a suitable makefile exists, each time you change some source files,
@@ -48,10 +48,10 @@ files, it issues the commands recorded in the makefile.
 .B make
 executes commands in the
 .I makefile
-to update one or more target
-.IR names ,
+to update one or more
+.IR targets ,
 where
-.I name
+.I target
 is typically a program.
 If no
 .B \-f
@@ -76,9 +76,8 @@ listing, right near other important files such as
 The first name checked,
 .IR GNUmakefile ,
 is not recommended for most makefiles.  You should use this name if you have a
-makefile that is specific to GNU
-.BR make ,
-and will not be understood by other versions of
+makefile that is specific to GNU Make, and will not be understood by other
+versions of
 .BR make .
 If
 .I makefile
@@ -115,41 +114,47 @@ This is typically used with recursive invocations of
 .TP 0.5i
 .B \-d
 Print debugging information in addition to normal processing.
-The debugging information says which files are being considered for
-remaking, which file-times are being compared and with what results,
-which files actually need to be remade, which implicit rules are
-considered and which are applied---everything interesting about how
-.B make
-decides what to do.
+This is the same as specifying
+.BR \-\-debug=all .
 .TP 0.5i
 .BI \-\-debug "[=FLAGS]"
 Print debugging information in addition to normal processing.
 If the
 .I FLAGS
 are omitted, then the behavior is the same as if
-.B \-d
+.B \-\-debug=basic
 was specified.
 .I FLAGS
-may be
-.I a
-for all debugging output (same as using
-.BR \-d ),
-.I b
+may be any or all of the following names, comma- or space-separated.  Only the
+first character is significant: the rest may be omitted:
+.I all
+for all debugging output,
+.I basic
 for basic debugging,
-.I v
+.I verbose
 for more verbose basic debugging,
-.I i
-for showing implicit rules,
-.I j
-for details on invocation of commands, and
-.I m
-for debugging while remaking makefiles.  Use
-.I n
+.I implicit
+for showing implicit rule search operations,
+.I jobs
+for details on invocation of commands,
+.I makefile
+for debugging while remaking makefiles,
+.I print
+shows all recipes that are run even if they are silent, and
+.I why
+shows the reason
+.BR make
+decided to rebuild each target.  Use
+.I none
 to disable all previous debugging flags.
 .TP 0.5i
 \fB\-e\fR, \fB\-\-environment\-overrides\fR
-Give variables taken from the environment precedence
-over variables from makefiles.
+Give variables taken from the environment precedence over variables
+from makefiles.
+.TP 0.5i
+\fB\-E\fR \fIstring\fR, \fB\-\-eval\fR \fIstring\fR
+Interpret \fIstring\fR using the \fBeval\fR function, before parsing any
+makefiles.
 .TP 0.5i
 \fB\-f\fR \fIfile\fR, \fB\-\-file\fR=\fIfile\fR, \fB\-\-makefile\fR=\fIFILE\fR
 Use
@@ -211,6 +216,16 @@ see the section
 .B PARALLEL MAKE AND THE JOBSERVER
 for details
 .TP 0.5i
+\fB\--jobserver-style=\fR\fIstyle\fR
+The style of jobserver to use.  The
+.I style
+may be one of
+.BR fifo ,
+.BR pipe ,
+or
+.B sem
+(Windows only).
+.TP 0.5i
 \fB\-k\fR, \fB\-\-keep\-going\fR
 Continue as much as possible after an error.
 While the target that failed, and those that depend on it, cannot
@@ -229,7 +244,7 @@ Use the latest mtime between symlinks and target.
 .TP 0.5i
 \fB\-n\fR, \fB\-\-just\-print\fR, \fB\-\-dry\-run\fR, \fB\-\-recon\fR
 Print the commands that would be executed, but do not execute them (except in
-certain circumstances). \fB\-\-silent\fR also silences the recipes.
+certain circumstances).
 .TP 0.5i
 \fB\-o\fR \fIfile\fR, \fB\-\-old\-file\fR=\fIfile\fR, \fB\-\-assume\-old\fR=\fIfile\fR
 Do not remake the file
@@ -267,9 +282,14 @@ reading the makefiles; then execute as usual or as otherwise
 specified.
 This also prints the version information given by the
 .B \-v
-switch (see below).
-To print the data base without trying to remake any files, use
+switch (see below).  To print the built-in data base only, use
 .IR "make \-p \-f/dev/null" .
+.TP 0.5i
+\fB\-\-print\-targets\fR
+Print each target defined as a result of reading the makefiles, one target per
+line, then exit with success.  Implicit rule targets are not printed, nor are
+special targets (target names that consist of "." followed by all upper-case
+letters).  No recipe commands are invoked and no makefiles are rebuilt.
 .TP 0.5i
 \fB\-q\fR, \fB\-\-question\fR
 ``Question mode''.
@@ -287,19 +307,13 @@ Don't define any built\-in variables.
 \fB\-s\fR, \fB\-\-silent\fR, \fB\-\-quiet\fR
 Silent operation; do not print the commands as they are executed.
 .TP 0.5i
+.B \-\-no\-silent
+Cancel the effect of the \fB\-s\fR option.
+.TP 0.5i
 \fB\-S\fR, \fB\-\-no\-keep\-going\fR, \fB\-\-stop\fR
 Cancel the effect of the
 .B \-k
 option.
-This is never necessary except in a recursive
-.B make
-where
-.B \-k
-might be inherited from the top-level
-.B make
-via MAKEFLAGS or if you set
-.B \-k
-in MAKEFLAGS in your environment.
 .TP 0.5i
 \fB\-t\fR, \fB\-\-touch\fR
 Touch files (mark them up to date without really changing them)
@@ -331,10 +345,30 @@ Turn off
 .BR \-w ,
 even if it was turned on implicitly.
 .TP 0.5i
+.BI \-\-shuffle "[=MODE]"
+Enable shuffling of goal and prerequisite ordering.
+.I MODE
+is one of
+.I none
+to disable shuffle mode,
+.I random
+to shuffle prerequisites in random order,
+.I reverse
+to consider prerequisites in reverse order, or an integer
+.I <seed>
+which enables
+.I random
+mode with a specific
+.I seed
+value.  If
+.I MODE
+is omitted the default is
+.IR random .
+.TP 0.5i
 \fB\-W\fR \fIfile\fR, \fB\-\-what\-if\fR=\fIfile\fR, \fB\-\-new\-file\fR=\fIfile\fR, \fB\-\-assume\-new\fR=\fIfile\fR
 Pretend that the target
 .I file
-has just been modified, and if no \fB\-\-assume\-old\fR given, that all other files exist and are old.
+has just been modified.
 When used with the
 .B \-n
 flag, this shows you what would happen if you were to modify that file.
@@ -347,12 +381,59 @@ command on the given file before running
 except that the modification time is changed only in the imagination of
 .BR make .
 .TP 0.5i
+\fB\-\-warn\fR[=\fIARG[\fR,\fIARG\fR]]
+Control warning reporting for makefiles.  This option can appear multiple times.
+In case of conflicts, later settings override earlier settings.
+.I ARG
+can be an action; one of
+.IR ignore ,
+.IR warn ,
+or
+.I error
+to set the default action for all warnings, or it can be a specific warning:
+.I circular-dep
+(finding a circular dependency),
+.I invalid-ref
+(referencing an invalid variable name),
+.I invalid-var
+(assigning to an invalid variable name),
+or
+.I undefined-var
+(referencing an undefined variable).  The behavior of each warning can be set
+by adding
+.BI : action
+after the warning name.  If an action is not specified the default is
+.IR warn .
+If no
+.I ARG
+is provided the action for all warnings is
+.IR warn .
+If no
+.B \-\-warn
+option is provided the default action for
+.I invalid-var
+and
+.I invalid-ref
+is
+.I warn
+and the default action for
+.I undefined-var
+is
+.IR ignore .
+.TP 0.5i
 .B \-\-warn\-undefined\-variables
-Warn when an undefined variable is referenced.
+A deprecated alternative for
+.BR \-\-warn=undefined-var .
+.TP 0.5i
+.B \-
+This option alone (not as an argument to the
+.B \-f
+option) is ignored, unless a target named
+.B \-
+is defined in the makefile, in which case that target is added to the makefile
+goals.
 .SH "EXIT STATUS"
-GNU
-.B make
-exits with a status of zero if all makefiles were successfully parsed
+GNU Make exits with a status of zero if all makefiles were successfully parsed
 and no targets that were built failed.  A status of one will be returned
 if the
 .B \-q
@@ -371,7 +452,9 @@ programs are properly installed at your site, the command
 .IP
 .B info make
 .PP
-should give you access to the complete manual.
+should give you access to the complete manual. Additionally, the
+manual is also available online at
+.IR https://www.gnu.org/software/make/manual/html_node/index.html
 .SH "PARALLEL MAKE AND THE JOBSERVER"
 Using the
 .I -j
@@ -442,9 +525,9 @@ This manual page contributed by Dennis Morse of Stanford University.
 Further updates contributed by Mike Frysinger.  It has been reworked by Roland
 McGrath.  Maintained by Paul Smith.
 .SH "COPYRIGHT"
-Copyright \(co 1992-1993, 1996-2014 Free Software Foundation, Inc.
+Copyright \(co 1992-1993, 1996-2016 Free Software Foundation, Inc.
 This file is part of
-.IR "GNU make" .
+.IR "GNU Make" .
 .LP
 GNU Make is free software; you can redistribute it and/or modify it under the
 terms of the GNU General Public License as published by the Free Software
@@ -457,4 +540,4 @@ A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 .LP
 You should have received a copy of the GNU General Public License along with
 this program.  If not, see
-.IR http://www.gnu.org/licenses/ .
+.IR https://www.gnu.org/licenses/ .

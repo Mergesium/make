@@ -1,3 +1,135 @@
+make-dfsg (4.3-4) unstable; urgency=high
+
+  * Cherry picked [SV 58232] Disable inheritance of jobserver FDs for
+    recursive make from ther development branch
+  * Bug fix: "FTBFS: E: Build killed with signal TERM after 150 minutes of
+    inactivity", thanks to Lucas Nussbaum (Closes: #963335).
+
+ -- Manoj Srivastava <srivasta@debian.org>  Tue, 30 Jun 2020 00:58:36 -0700
+
+make-dfsg (4.3-3) unstable; urgency=medium
+
+  * Fix ordering if include dirs
+    There has been a long standind bug where INCLUDE_DIRS /usr/include is
+    included twice.  The more important problem is it is before the
+    /usr/local/include. This commit fixes the ordering.
+  * Bug fix: "/usr/local/include is wrong priority in default
+    include_dirs", thanks to Alex Samad (Closes: #493523).
+
+ -- Manoj Srivastava <srivasta@debian.org>  Fri, 05 Jun 2020 18:59:32 -0700
+
+make-dfsg (4.3-2) unstable; urgency=medium
+
+  * Fixes critical bugs
+  * Bug fix: "Broken symlinks: /usr/bin/gmake,
+    /usr/share/man/man1/gmake.1.gz", thanks to Peter Wienemann (Closes:
+    #961860). I forgot that we must use absolute pathnames,
+  * Bug fix: "Could the error message &quot;Profiling timer
+    expired&quot;?", thanks to Hugo Herbelin (Closes: #601474). This bug
+    is a decade old, and I can't reprodsuce it. I have not seen other
+    people being able to reproduce it either, and the codebase has changed
+    massively. If you have a recipe that can reproduce this with recent
+    versions, please do reopen the bug
+
+ -- Manoj Srivastava <srivasta@debian.org>  Thu, 04 Jun 2020 21:57:28 -0700
+
+make-dfsg (4.3-1) unstable; urgency=medium
+
+  * New upstream version (Closes: #951038).
+  * Bug fix: "man page/info doc enhancement", thanks to Michael Stone
+    (Closes: #912291).
+  * Bug fix: "[PATCH] make-dfsg: Please add support for a
+    &quot;noguile&quot; build-profile.", thanks to Karsten Merker
+    (Closes: #892566). The "noguile" profile results in dropping the
+    build-dependency on guile-2.0-dev and disabling the creation of the
+    "make-guile" binary package.  This eases (cross-)building the make
+    package when bootstrapping a new architecture.
+  * Bug fix: "please provide /usr/bin/gmake", thanks to Helmut Grohne
+    (Closes: #898101).
+  * Bug fix: "&#39;make -Orecurse&#39; does not work as expected", thanks
+    to Michael Olbrich (Closes: #909009).Reverted back to upstream
+    version.
+
+ -- Manoj Srivastava <srivasta@debian.org>  Wed, 20 May 2020 17:07:47 -0700
+
+make-dfsg (4.2.1-2) unstable; urgency=medium
+
+  * Update to acknowledge NMUs by Rob Browning and Ben Hutchings.
+    Thank you.
+
+ -- Manoj Srivastava <srivasta@debian.org>  Sun, 03 May 2020 17:55:19 -0700
+
+make-dfsg (4.2.1-1.3) unstable; urgency=medium
+
+  * Non-maintainer upload.
+  * Build against guile-3.0; drop 1.8 and 2.0. (Closes: 885213)
+
+ -- Rob Browning <rlb@defaultvalue.org>  Fri, 24 Apr 2020 20:02:33 -0500
+
+make-dfsg (4.2.1-1.3~1.gbpe4407c) UNRELEASED; urgency=medium
+
+  ** SNAPSHOT build @e4407cc53d66f2b594143ee73167cc64eac69ebe **
+
+  * Non-maintainer upload.
+  * UNRELEASED
+
+ -- Rob Browning <rlb@defaultvalue.org>  Fri, 24 Apr 2020 19:15:55 -0500
+
+make-dfsg (4.2.1-1.2) unstable; urgency=medium
+
+  * Non-maintainer upload.
+  * Fix validation of long names in archives (regression in 4.2.1-1.1)
+    (Closes: #904749)
+
+ -- Ben Hutchings <ben@decadent.org.uk>  Sat, 28 Jul 2018 18:07:31 +0800
+
+make-dfsg (4.2.1-1.1) unstable; urgency=medium
+
+  * Non-maintainer upload
+  * Resolve issues discovered by static code analysis.
+  * Fix potential hangs (Closes: #890309):
+    - [SV 51159] Use a non-blocking read with pselect to avoid hangs.
+    - [SV 51400] Only unblock fatal signals after child invocation
+    - Treat -Otarget and -Orecurse as -Oline, to avoid a hang
+  * Fix FTBFS with glibc 2.7, thanks to Aurelien Jarno (Closes: #891365):
+    - glob: Do not assume glibc glob internals.
+    - configure.ac: Support GLIBC glob interface version 2
+  * Restore old behaviour of -j in MAKEFLAGS variable (Closes: #890430):
+    - main.c (main): [SV 48274] Allow -j in makefile MAKEFLAGS variable.
+    - tests/scripts/features/output-sync: Revert bad change in 0c5a9f9b92a
+    - Makefile.am: Add jhelp.pl to remote test setup.
+  * make-guile: Add version to Provides field (Closes: #891702)
+  * debian/control: Update Vcs-{Browser,Git} fields to point to Salsa
+  * debian/control, debian/copyright: Update URLs to use HTTP-S
+  * debian/rules: Add -Wall to CFLAGS
+
+ -- Ben Hutchings <ben@decadent.org.uk>  Wed, 11 Jul 2018 07:38:22 +0100
+
+make-dfsg (4.2.1-1) unstable; urgency=medium
+
+  * New Upsrteam release.
+  * New variable: $(.SHELLSTATUS) is set to the exit status of the last != or
+    $(shell ...) function invoked in this instance of make.  This will be "0" if
+    successful or not "0" if not successful.  The variable value is unset if no
+    != or $(shell ...) function has been invoked.
+  * The $(file ...) function can now read from a file with $(file <FILE).
+    The function is expanded to the contents of the file.  The contents are
+    expanded verbatim except that the final newline, if any, is stripped.
+  * The makefile line numbers shown by GNU make now point directly to the
+    specific line in the recipe where the failure or warning occurred.
+    Sample changes suggested by Brian Vandenberg <phantall@gmail.com>
+  * The interface to GNU make's "jobserver" is stable as documented in the
+    manual, for tools which may want to access it.
+    WARNING: Backward-incompatibility! The internal-only command line option
+    --jobserver-fds has been renamed for publishing, to --jobserver-auth.
+  * The amount of parallelism can be determined by querying MAKEFLAGS, even when
+    the job server is enabled (previously MAKEFLAGS would always contain only
+    "-j", with no number, when job server was enabled).
+  * Bug fix: "SIGSEGVs on long parameter", thanks to Marcos Dione (Closes:
+    #858647).
+
+ -- Manoj Srivastava <srivasta@debian.org>  Mon, 12 Feb 2018 16:36:45 -0800
+
 make-dfsg (4.1-9.1) unstable; urgency=medium
 
   * Non-maintainer upload.
